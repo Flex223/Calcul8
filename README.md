@@ -16,7 +16,7 @@ Calcul8 is an interactive arithmetic practice application built using Python and
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/Flex223/calcul8.git
+   git clone https://github.com/yourusername/calcul8.git
 2. Navigate to the project directory:
    ```sh
    cd calcul8
@@ -34,4 +34,3 @@ Run the application:
 ![SecondScreen](pics/second.png)
 ![ThirdScreen](pics/third.png)
 ![FourthScreen](pics/fourth.png)
-
