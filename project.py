@@ -1,25 +1,42 @@
-import tkinter as tk
-from tkinter import messagebox
+import customtkinter as ctk
 import random
 from ctypes import windll
+from PIL import Image
+from tkinter import StringVar
 
 def init(root):
-    global entry
-    root = root
+    global entry, divide_icon, plus_icon, neg_icon, multiply_icon
     root.title("Calcul8")
-    root.geometry("400x450")  # Set default resolution to 800x600
+    root.geometry("400x300")  # Set default resolution to 400x300
+    root.update_idletasks()  # Update "requested size" from geometry manager
+    x = (root.winfo_screenwidth() // 2) - (root.winfo_width() // 2)
+    y = (root.winfo_screenheight() // 2) - (root.winfo_height() // 2)
+    root.geometry(f"+{x}+{y}")  # Center the window on the screen
     root.configure(bg='#EDEDED')
 
+    divide_icon = ctk.CTkImage(Image.open("pics/divide.png"), size=(40, 40))
+    plus_icon = ctk.CTkImage(Image.open("pics/plus.png"), size=(40, 40))
+    neg_icon = ctk.CTkImage(Image.open("pics/neg.png"), size=(40, 40))
+    multiply_icon = ctk.CTkImage(Image.open("pics/multiply.png"), size=(40, 40))
+
+    #windll.shcore.SetProcessDpiAwareness(1)
+
     # Create a label
-    label = tk.Label(root, text="Enter your name:")
+    label = ctk.CTkLabel(root, text="Calcul8", font=("Arial", 24), text_color='#212121')
     label.pack(pady=10)
 
+    card = ctk.CTkFrame(root, fg_color="#ffffff", corner_radius=10)
+    card.pack(pady=10)
+
+    label = ctk.CTkLabel(card, text="Enter your name", font=("Arial", 20), text_color='#212121')
+    label.pack(pady=10, padx=50)
+
     # Create an entry widget
-    entry = tk.Entry(root)
+    entry = ctk.CTkEntry(card, fg_color='#BDBDBD', border_color='#212121', text_color='black')
     entry.pack(pady=10)
 
     # Create a button
-    button = tk.Button(root, text="Submit", command=name_selected)
+    button = ctk.CTkButton(card, text="Submit", command=name_selected, fg_color='#03A9F4', hover_color='#FFC107')
     button.pack(pady=10)
 
 def name_selected():
@@ -28,122 +45,53 @@ def name_selected():
     if name:
         show_operations()
     else:
-        messagebox.showwarning("Input Error", "Please enter your name.")
+        entry.configure(border_color="red", border_width=2)
 
 def show_operations():
-        global name, selected_operator
-        selected_operator = None  # Initialize the selected operator
-        # Clear the first screen widgets
-        for widget in root.winfo_children():
-            widget.destroy()
+    global name, selected_operator, divide_icon, plus_icon, neg_icon, multiply_icon
+    selected_operator = None  # Initialize the selected operator
+    # Clear the first screen widgets
+    for widget in root.winfo_children():
+        widget.destroy()
+    
+    root.geometry("400x300")
+    
+    # Create a frame to center the buttons
+    button_frame = ctk.CTkFrame(root,  fg_color='white')
+    button_frame.pack(expand=True)
 
-        # Display the player's name
-        name_label = tk.Label(root, text=f"Player: {name}", font=("Arial", 18))
-        name_label.pack(pady=10)
-
-        # Create a frame to center the buttons
-        button_frame = tk.Frame(root)
-        button_frame.pack(expand=True)
-
-        # Create buttons for operations
-        operations = ['+', '-', '*', '/']
-        for i, op in enumerate(operations):
-            button = tk.Button(button_frame, text=op, font=("Arial", 24), width=5, height=2, command=lambda op=op: select_operator(op))
-            button.grid(row=i // 2, column=i % 2, padx=20, pady=20)
+    # Create buttons for operations
+    operations = ['+', '-', '*', '/']
+    l = (lambda o: divide_icon if o == '/' else plus_icon if o == "+" else neg_icon if o =="-" else multiply_icon)
+    for i, op in enumerate(operations):
+        button = ctk.CTkButton(button_frame,image=l(op) ,text="", font=("Arial", 24), width=60, height=60, command=lambda op=op: select_operator(op), fg_color='#03A9F4', hover_color='#FFC107')
+        button.grid(row=i // 2, column=i % 2, padx=20, pady=20)
 
 def select_operator(op):
     global selected_operator
     selected_operator = op
     show_difficulty()
 
-def select_difficulty(diff):
-    global selected_difficulty
-    selected_difficulty = diff
-    show_exercise()
-
 def show_difficulty():
     # Clear the second screen widgets
     for widget in root.winfo_children():
         widget.destroy()
 
-    # Display the player's name and selected operator
-    info_label = tk.Label(root, text=f"Player: {name}, Operator: {selected_operator}", font=("Arial", 18))
-    info_label.pack(pady=10)
 
     # Create a frame to center the buttons
-    button_frame = tk.Frame(root)
+    button_frame = ctk.CTkFrame(root, fg_color="white")
     button_frame.pack(expand=True)
 
-    # Create buttons for difficulty levels
+    # Create buttons for difficulty levels with rounded corners
     difficulties = ['0', '00', '000']
     for i, diff in enumerate(difficulties):
-        button = tk.Button(button_frame, text=diff, font=("Arial", 24), width=5, height=2, command=lambda diff=diff: select_difficulty(diff))
-        button.grid(row=0, column=i, padx=20, pady=20)
+        button = ctk.CTkButton(button_frame, text=diff, fg_color='#03A9F4', hover_color='#FFC107', font=("Arial", 24), corner_radius=10, width=50, height=50, command=lambda diff=diff: select_difficulty(diff))
+        button.grid(row=0, column=i, padx=15, pady=20)
 
-def show_exercise():
-    global exercises, selected_operator, selected_difficulty, answer_entries, check_button, show_button, button_frame
-    # Clear the previous screen widgets
-    for widget in root.winfo_children():
-        widget.destroy()
-
-    create_exercise(selected_operator, (lambda s: 1 if s == '0' else 10 if s == '00' else 100)(selected_difficulty), (lambda s: 9 if s == '0' else 99 if s == '00' else 999)(selected_difficulty))
-    root.geometry("1000x600")
-    # Display the player's name and selected operator
-    info_label = tk.Label(root, text=f"Player: {name}, Operator: {selected_operator}, Difficulty: {selected_difficulty}", font=("Arial", 18))
-    info_label.pack(pady=10)
-
-    # Create a frame to center the exercises
-    exercise_frame = tk.Frame(root)
-    exercise_frame.pack(expand=True)
-
-    answer_entries = []
-
-    # Display exercises with entry widgets in a 2x3 grid
-    for i, (a, b) in enumerate(exercises):
-        exercise_label = tk.Label(exercise_frame, text=f"{a} {selected_operator} {b} =", font=("Arial", 18))
-        exercise_label.grid(row=i // 2, column=(i % 2) * 2, padx=10, pady=10)
-        answer_entry = tk.Entry(exercise_frame, font=("Arial", 18))
-        answer_entry.grid(row=i // 2, column=(i % 2) * 2 + 1, padx=10, pady=10)
-        answer_entries.append(answer_entry)
-
-
-    # Create a frame to center the buttons horizontally
-    button_frame = tk.Frame(exercise_frame)
-    button_frame.grid(row=3, column=0, columnspan=4)
-    # Add Check Answers and Show Answers buttons to the grid
-    check_button = tk.Button(button_frame, text="Check Answers", font=("Arial", 18), command=check_answers)
-    check_button.grid(row=3, column=0, padx=10, pady=10)
-    show_button = tk.Button(button_frame, text="Show Answers", font=("Arial", 18), command=show_answers)
-    show_button.grid(row=3, column=1, padx=10, pady=10)
-
-def check_answers():
-    global answers, answer_entries
-    correct = 0
-    for i, entry in enumerate(answer_entries):
-        try:
-            if float(entry.get()) == answers[i]:
-                entry.config(highlightbackground='green', highlightcolor='green', highlightthickness=2)
-                correct += 1
-            else:
-                entry.config(highlightbackground='red', highlightcolor='red', highlightthickness=2)
-        except ValueError:
-            entry.config(highlightbackground='red', highlightcolor='red', highlightthickness=2)
-
-def show_answers():
-    global answers, answer_entries, check_button, show_button, button_frame
-    for i, entry in enumerate(answer_entries):
-        entry.delete(0, tk.END)
-        entry.insert(0, str(answers[i]))
-    
-    # Destroy Check Answers and Show Answers buttons
-    check_button.destroy()
-    show_button.destroy()
-    
-    # Add Back button
-    back_button = tk.Button(button_frame, text="Back", font=("Arial", 18), command=show_operations)
-    back_button.pack(pady=10)
-
-
+def select_difficulty(diff):
+    global selected_difficulty
+    selected_difficulty = diff
+    show_exercise()
 
 def create_exercise(operator, min, max):
     global exercises, answers
@@ -175,17 +123,80 @@ def create_exercise(operator, min, max):
             exercises.append((a,b))
             szamlalo += 1 
 
+def show_exercise():
+    global exercises, selected_operator, selected_difficulty, answer_entries, check_button, show_button, button_frame
+    # Clear the previous screen widgets
+    for widget in root.winfo_children():
+        widget.destroy()
+    
+    create_exercise(selected_operator, (lambda s: 1 if s == '0' else 10 if s == '00' else 100)(selected_difficulty), (lambda s: 9 if s == '0' else 99 if s == '00' else 999)(selected_difficulty))
+    root.geometry("600x300")
+
+    # Create a frame to center the exercises
+    exercise_frame = ctk.CTkFrame(root, fg_color='white')
+    exercise_frame.pack(expand=True)
+
+    answer_entries = []
+    
+    # Display exercises with entry widgets in a 2x3 grid
+    for i, (a, b) in enumerate(exercises):
+        exercise_label = ctk.CTkLabel(exercise_frame, text=f"{a} {selected_operator} {b} =", font=("Arial", 18), text_color='#212121')
+        exercise_label.grid(row=i // 2, column=(i % 2) * 2, padx=10, pady=10)
+        
+        sv = StringVar()
+        sv.trace_add("write", lambda name, index, mode, sv=sv: answer_entry_event(sv))
+        
+        answer_entry = ctk.CTkEntry(exercise_frame, textvariable=sv, font=("Arial", 18), text_color='#0288D1', fg_color='#BDBDBD', border_color='#212121')
+        answer_entry.grid(row=i // 2, column=(i % 2) * 2 + 1, padx=10, pady=10)
+        answer_entries.append(answer_entry)
+
+    # Create a frame to center the buttons horizontally
+    button_frame = ctk.CTkFrame(exercise_frame, fg_color='white')
+    button_frame.grid(row=3, column=0, columnspan=4)
+    
+    # Add Check Answers and Show Answers buttons to the grid
+    check_button = ctk.CTkButton(button_frame, text="Check Answers", font=("Arial", 18), command=check_answers, fg_color='#03A9F4', hover_color='#FFC107')
+    check_button.grid(row=3, column=0, padx=10, pady=10)
+    
+    show_button = ctk.CTkButton(button_frame, text="Show Answers", font=("Arial", 18), command=show_answers, fg_color='#03A9F4', hover_color='#FFC107')
+    show_button.grid(row=3, column=1, padx=10, pady=10)
+
+def answer_entry_event(sv):
+    for entry in answer_entries:
+        if entry.get() == sv.get():
+            entry.configure(text_color='#0288D1', border_color='#212121')
+
+
+def check_answers():
+    global answers, answer_entries
+    correct = 0
+    for i, entry in enumerate(answer_entries):
+        try:
+            if float(entry.get()) == answers[i]:
+                entry.configure(border_color="green", text_color="green", border_width=2)
+                correct += 1
+            else:
+                entry.configure(border_color="red", text_color="red", border_width=2)
+        except ValueError:
+            entry.configure(border_color="red", border_width=2)
+
+def show_answers():
+    global answers, answer_entries, check_button, show_button, button_frame
+    for i, entry in enumerate(answer_entries):
+        entry.delete(0, ctk.END)
+        entry.insert(0, str(int(answers[i])))
+        entry.configure(state='readonly')
+    
+    # Destroy Check Answers and Show Answers buttons
+    check_button.destroy()
+    show_button.destroy()
+    
+    # Add Back button
+    back_button = ctk.CTkButton(button_frame, text="Back", font=("Arial", 18), command=show_operations, fg_color='#03A9F4', hover_color='#FFC107')
+    back_button.pack(pady=10, padx=10)
 
 # Create the main window
-root = tk.Tk()
-root.title("Calcul8")
-root.geometry("800x600")  # Set default resolution to 800x600
-root.configure(bg='#EDEDED')
-
-# Set the DPI awareness for the application (Windows specific)
-windll.shcore.SetProcessDpiAwareness(1)
-
-# Initialize the first screen
+root = ctk.CTk(fg_color='#B3E5FC')
 init(root)
 
 # Run the application
