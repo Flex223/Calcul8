@@ -1,4 +1,5 @@
 # Calcul8
+[Project Management Board](https://trello.com/b/12lzZwgl/csk2-kanban-tabla)
 
 Calcul8 is an interactive arithmetic practice application built using Python and customtkinter. It allows users to practice basic arithmetic operations (addition, subtraction, multiplication, and division) with varying levels of difficulty.
 
